@@ -1,0 +1,155 @@
+﻿@model RJP.Models.OpenAccountViewModel
+@{
+    ViewData["Title"] = "Home Page";
+    var pageName = ViewContext.RouteData.Values["controller"].ToString(); }
+
+    <div class="alert text-center" hidden></div>
+<div>
+    <h4 align="center">Open an Account or Process a Transaction</h4>
+    <hr />
+    <div class="col-sm-9">
+        <input type="hidden" name="Account_Id" />
+        <div>
+            <h4 align="center"></h4>
+            <form class="form openAccountForm" id="openAccountForm">
+                <div class="row form-group">
+                    <label for="client" class="col-sm-2 col-form-label">Customer</label>
+                    <div class="col-sm-10">
+                        <select name="Customer_Id">
+                            <option value="">please select a customer</option>
+                            @foreach (var customerItem in Model.Customers)
+                            {
+                                <option value="@customerItem.Customer_Id">@customerItem.FullName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <label for="amount" class="col-sm-2 col-form-label">Balance</label>
+                    <div class="col-sm-10"><input type="text" name="Balance" placeholder="Enter your Balance"></div>
+                </div>
+
+                <div class="row for-group" id="transaction-type-section" hidden>
+                    <label for="transaction-type" class="col-sm-2 col-form-label">Transaction Type</label>
+                    <div class="col-sm-10">
+                        <select name="Transaction_Type">
+                            <option>please select a transaction type</option>
+                            @foreach (var transactionTypeItem in Model.TransactionTypes)
+                            {
+                                <option value="@transactionTypeItem">@transactionTypeItem</option>
+                            }
+                        </select>
+                    </div>
+                   
+                </div>
+
+            </form>
+            <div class="row form-group">
+
+                <div class="col-sm-12"><button class="btn btn-success pull-right" id="createAccountOrTransactionBtn" data-account-exist="false">Save</button></div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".nav li").removeClass("active");
+        $(".nav li a[id=" + '@pageName.ToLower()' + "]").parent("li").addClass("active");
+
+        $("body").on("click", "#createAccountOrTransactionBtn", function () {
+            var accountAlreadyExists = $(this).attr("data-account-exist");
+            CreateAccountOrTransaction(accountAlreadyExists);
+           
+        });
+        $("body").on("change", "select[name='Customer_Id']", function () {
+            $.ajax('/api/Accounts/CheckAccountIfExists', {
+                type: 'POST',
+                data: { customerId : $(this).val()},
+                success: function (data, status, xhr) {
+                    debugger
+                    var parsedData = data;
+                    if (parsedData.status === "success") {
+                        if (parsedData.accountExists) {
+                            $("#createAccountOrTransactionBtn").attr("data-account-exist", true);
+                            $("input[name='Account_Id']").val(parsedData.account_Id);
+                            $("#transaction-type-section").show();
+                        } else {
+                            $("#createAccountOrTransactionBtn").attr("data-account-exist", false);
+                            $("input[name='Account_Id']").val("");
+                            $("#transaction-type-section").hide();
+                        }
+                    } else {
+                        $("#createAccountOrTransactionBtn").attr("data-account-exist", false);
+                        $("input[name='Account_Id']").val("");
+                        $("#transaction-type-section").hide();
+                    }
+                    
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+
+                }
+            });
+        });
+    })
+
+    function CreateAccountOrTransaction(accountAlreadyExists) {
+        debugger
+        if (accountAlreadyExists === 'true') {
+         
+
+            var formData = {
+                Account_Id: $("input[name='Account_Id']").val(),
+                Description: "A Transaction of type " + $("select[name='Transaction_Type']").val() +
+                    " have been sent for the Customer whose name is " + $("select[name='Customer_Id']").html() + " with Balanace " + $("input[name='Balance']").val(),
+                Transaction_Type: $("select[name='Transaction_Type']").val()
+            };
+            $.ajax('/api/Transactions/CreateTransactions', {
+                type: 'POST',
+                data: { 'serializedTransaction': JSON.stringify(formData) },
+                success: function (data, status, xhr) {
+                    var parsedData = data;
+                    $(".alert").show();
+                    if (parsedData.status === "success") {
+                        $(".alert").addClass("alert-success");
+                        $("#createAccountOrTransactionBtn").attr("data-account-exist", false);
+                        $("#transaction-type-section").hide();
+                    } else {
+                        $(".alert").addClass("alert-danger");
+                    }
+                    $(".alert").html(parsedData.message);
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+
+                }
+            });
+        }
+        else {
+            var formData = $("#openAccountForm").serialize();
+            $.ajax('/api/Accounts/CreateAccount', {
+                type: 'POST',
+                data: formData,
+                success: function (data, status, xhr) {
+                    var parsedData = data;
+                    $(".alert").show();
+                    if (parsedData.status === "success") {
+                        $(".alert").addClass("alert-success");
+                        $("#createAccountOrTransactionBtn").attr("data-account-exist", false);
+                        $("#transaction-type-section").hide();
+                    } else {
+                        $(".alert").addClass("alert-danger");
+                    }
+                    $(".alert").html(parsedData.message);
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+
+                }
+            });
+        }
+       
+       
+    }
+</script>

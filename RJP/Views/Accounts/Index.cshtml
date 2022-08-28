@@ -1,0 +1,61 @@
+﻿@model List<DAL.Models.AccountsGridViewModel>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Index";
+    var pageName = ViewContext.RouteData.Values["controller"].ToString();
+}
+
+
+<div>
+    <h4 align="center">Accounts List</h4>
+    <hr />
+    @if (Model.Count > 0)
+    {
+        <table class="table table-striped" style="margin-top: 10px;">
+            <thead>
+                <tr>
+                    <th>Account No</th>
+                    <th>Customer</th>
+                    <th>Balance</th>
+                    <th>Transactions</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var accountItem in Model)
+                {
+                    <tr>
+                        <td>@accountItem.Account_No</td>
+                        <td>@accountItem.Customer</td>
+                        <td>@accountItem.Balance</td>
+                        <td><a class="btn btn-primary" href="/api/Transactions/TransactionsList?accountId=@accountItem.Account_Id">View</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+    else
+    {
+        <p class="no-data-found">No Data found!</p>
+    }
+</div>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".nav li").removeClass("active");
+        $(".nav li a[id=" + '@pageName.ToLower()' + "]").parent("li").addClass("active");
+        //$.ajax('/api/Customers/SearchCustomers', {
+        //    type: 'POST',
+        //    data: { },
+        //    success: function (data, status, xhr) {
+        //        var s = JSON.parse(data);
+        //       alert('status: ' + s.status + ', data: ' + s.id);
+        //    },
+        //    error: function (jqXhr, textStatus, errorMessage) {
+
+        //    }
+        //});
+    })
+</script>
+

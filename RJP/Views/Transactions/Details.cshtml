@@ -1,0 +1,56 @@
+﻿@model DAL.Models.TransactionsGridViewModel
+@{
+    ViewData["Title"] = "Details";
+    var pageName = ViewContext.RouteData.Values["controller"].ToString();
+}
+<div class="transaction-details">
+    @if (Model != null)
+    {
+        <h4 align="center">Transaction No: @Model.Transaction_No</h4>
+        <div class="row form-group">
+            <label for="client" class="col-sm-2 col-form-label">Transaction No</label>
+            <div class="col-sm-10"><input type="text" readonly value="@Model.Transaction_No" /></div>
+        </div>
+        <div class="row form-group">
+            <label for="client" class="col-sm-2 col-form-label">Transaction Type</label>
+            <div class="col-sm-10"><input type="text" readonly value="@Model.Transaction_Type" /></div>
+        </div>
+        <div class="row form-group">
+            <label for="client" class="col-sm-2 col-form-label">Transaction Date</label>
+            <div class="col-sm-10"><input type="text" readonly value="@Model.Transaction_Date" /></div>
+        </div>
+        <div class="row form-group">
+            <label for="client" class="col-sm-2 col-form-label">Description</label>
+            <div class="col-sm-10"><textarea readonly rows="10">@Model.Description</textarea></div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2  text-center"><a class="btn btn-danger" href="/api/Transactions/TransactionsList">Cancel</a></div>
+            <div class="col-sm-5"></div>
+        </div>
+
+    }
+    else
+    {
+        <p class="no-data-found">No Data found!</p>
+    }
+
+</div>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+         $(".nav li").removeClass("active");
+        $(".nav li a[id=" + '@pageName.ToLower()' + "]").parent("li").addClass("active");
+        //$.ajax('/api/Customers/SearchCustomers', {
+        //    type: 'POST',
+        //    data: { },
+        //    success: function (data, status, xhr) {
+        //        var s = JSON.parse(data);
+        //       alert('status: ' + s.status + ', data: ' + s.id);
+        //    },
+        //    error: function (jqXhr, textStatus, errorMessage) {
+
+        //    }
+        //});
+    })
+</script>
